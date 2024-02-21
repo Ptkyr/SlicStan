@@ -80,7 +80,7 @@ let run_single (slic : string) =
 
 let run_many (xs : System.Reflection.MethodInfo [], writeOutput) =
 
-    if writeOutput then Directory.CreateDirectory("/transformed_examples/") |> ignore
+    if writeOutput then Directory.CreateDirectory("transformed_examples/") |> ignore
 
     for x in Array.filter (fun (m: System.Reflection.MethodInfo) -> m.IsStatic) xs do
         let slic = (x.Invoke(None, [||])).ToString()
@@ -90,12 +90,12 @@ let run_many (xs : System.Reflection.MethodInfo [], writeOutput) =
             let transformed = run_single slic |> MiniStanSyntax.Prog_pretty           
             printfn "OK"
             if writeOutput 
-            then File.WriteAllText(sprintf "/transformed_examples/%s.stan" name, transformed)
+            then File.WriteAllText(sprintf "transformed_examples/%s.stan" name, transformed)
 
         with TranslationException (message, lastProg) ->  
             printfn "%s: %s." message name
             if writeOutput 
-            then File.WriteAllText(sprintf "/transformed_examples/%s.slic" name, sprintf "//%s\n%s" message (lastProg))
+            then File.WriteAllText(sprintf "transformed_examples/%s.slic" name, sprintf "//%s\n%s" message (lastProg))
             
 
 [<EntryPoint>]

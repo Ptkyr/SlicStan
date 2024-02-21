@@ -3,6 +3,11 @@
 type ArrSize = N of int | SizeVar of string
 let AnySize = N(-1)//
 
+let IndexToString (n: ArrSize) =
+    match n with
+    | N(i) -> sprintf "%d" (i - 1)
+    | SizeVar(s) -> s
+
 let SizeToString (n: ArrSize) =
     match n with
     | N(i) -> sprintf "%d" i
@@ -214,8 +219,12 @@ let rec E_pretty E =
   match E with
   | Var(x) -> x
   | Const(d) -> sprintf "%O" d
-  | Arr(Es) -> sprintf "[ %s ]" (List.reduce (fun s1 s2 -> s1+", "+s2) (List.map E_pretty Es))
-  | ArrElExp(e1, e2) -> ArrElExp_pretty E + "]" //sprintf "%s[%s]" (E_pretty e1) (E_pretty e2) 
+  | Arr(Es) -> sprintf "%s" (List.reduce (fun s1 s2 -> s1+", "+s2) (List.map E_pretty Es))
+  | ArrElExp(e1, e2) -> 
+    match e2 with 
+    | Const(_) -> ArrElExp_pretty E + "]" 
+    | _ -> ArrElExp_pretty E + " + 1]"
+    //sprintf "%s[%s]" (E_pretty e1) (E_pretty e2) )
   | Plus(e1, e2) -> sprintf "(%s + %s)" (E_pretty e1) (E_pretty e2)
   | Mul(e1, e2) -> sprintf "%s * %s" (E_pretty e1) (E_pretty e2)
   | Prim(p,[]) -> sprintf "%s()" p
@@ -234,7 +243,7 @@ and ArrElExp_pretty arr_el =
     match arr_el with 
     | ArrElExp(e1, e2) -> 
         match e1 with
-        | ArrElExp _ -> sprintf "%s,%s" (ArrElExp_pretty e1) (E_pretty e2)
+        | ArrElExp _ -> sprintf "%s + 1,%s" (ArrElExp_pretty e1) (E_pretty e2)
         | _ -> sprintf "%s%s" (ArrElExp_pretty e1) (E_pretty e2)
     | _ -> sprintf "%s[" (E_pretty arr_el)
 
@@ -246,14 +255,21 @@ and D_pretty D =
 let rec LValue_pretty (x:LValue) =
         match x with 
         | I(name) -> name
-        | A(lhs, index) -> A_pretty x + "]" //sprintf "%s[%s]" (LValue_pretty lhs) (E_pretty index)
- 
+        // This is for assignments i.e. acc0[z1_val + 1] += <expr>
+        | A(lhs, index) -> A_pretty x + "]"
+
  and A_pretty (x:LValue) = 
     match x with 
     | A(lhs, i) -> 
         match lhs with
-        | A _ -> sprintf "%s,%s" (A_pretty lhs) (E_pretty i)
-        | _ -> sprintf "%s%s" (A_pretty lhs) (E_pretty i)
+        | A _ -> 
+            match i with 
+            | Const(_) -> sprintf "%s,%s" (A_pretty lhs) (E_pretty i)
+            | _ -> sprintf "%s,%s" (A_pretty lhs) (E_pretty i)
+        | _ -> 
+            match i with 
+            | Const(_) -> sprintf "%s%s" (A_pretty lhs) (E_pretty i)
+            | _ -> sprintf "%s%s + 1" (A_pretty lhs) (E_pretty i)
     | _ -> sprintf "%s[" (LValue_pretty x)
 
 let rec assigns_syntax (S: S) : Set<Ide> =
@@ -359,6 +375,3 @@ let next() =
     ret
 
 let reset_levels() = cur <- 0 
-
-
-

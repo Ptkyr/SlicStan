@@ -75,7 +75,7 @@ let rec Decls_pretty decls =
     match decls with 
     | Declr (typestr, name) -> 
         match typestr with 
-        //| Array(t, n) -> "  " + (Type_pretty t) + " " + name + "[" + (SizeToString n) + "];\n"
+        | Array(t, n) -> "  " + (Type_pretty t) + " " + name + "[" + (SizeToString n) + "];\n"
         | _ -> "  " + (Type_pretty typestr) + " " + name + ";\n"
     | VSeq (d1, d2) ->  Decls_pretty d1 + Decls_pretty d2
     | VNone -> ""
@@ -89,7 +89,7 @@ let rec Statements_pretty ident decls =
     | SSeq (s1, s2) -> Statements_pretty ident s1 + Statements_pretty ident s2
     | If(e, s1, SNone) -> sprintf "%sif(%s){\n%s\n%s}" ident (E_pretty e) (Statements_pretty ident s1) ident
     | If(e, s1, s2) -> sprintf "%sif(%s){\n%s\n%s}\n%selse{\n%s\n%s}" ident (E_pretty e) (Statements_pretty (ident+"  ") s1) ident ident (Statements_pretty (ident+"  ") s2) ident
-    | For(x, l, u, s) -> sprintf "%sfor(%s in %s : %s){\n%s\n%s}\n" ident (x) (SizeToString l) (SizeToString u) (Statements_pretty (ident+"  ") s) ident
+    | For(x, l, u, s) -> sprintf "%sfor(%s in %s : %s){\n%s\n%s}\n" ident (x) (IndexToString l) (IndexToString u) (Statements_pretty (ident+"  ") s) ident
     | LocalDecl(t, x, s) -> sprintf "%s{ %s %s;\n%s%s}\n" ident (Type_pretty t) x (Statements_pretty (ident+"  ") s) ident
     | SNone -> ""
 
