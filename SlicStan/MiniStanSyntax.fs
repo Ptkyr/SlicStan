@@ -82,7 +82,10 @@ let rec Decls_pretty decls =
 
 let rec Statements_pretty ident decls =
     match decls with 
-    | Let (lhs, expr) -> ident +  LValue_pretty lhs + " = " + E_pretty expr + ";\n"
+    | Let (lhs, expr) -> ident +  LValue_pretty lhs + " = " + E_pretty expr + (
+        match expr with
+        | Prim(p, _) -> (if p = "categorical_logit_rng" then " - 1;\n" else ";\n") // In generated_quantities, makes z_i in [0, 1]
+        | _ -> ";\n")
     | Sample (lhs, dist) -> ident + (LValue_pretty lhs) + " ~ " + D_pretty dist + ";\n"
     | Factor (e) -> ident + "target += " + (E_pretty e) + ";\n"
     | PlusEq (lhs, e) -> ident + (LValue_pretty lhs) + " += " + (E_pretty e) + ";\n"

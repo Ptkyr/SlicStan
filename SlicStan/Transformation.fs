@@ -189,9 +189,10 @@ let rec to_Stan_statements (S: S) : Statements =
             let a = List.head args            
             let support_arr_size = N(2)
             let support = Const(2.0) // FIXME: not the right size
-            let def = Let(I(x), Prim("rep_vector", [Const(0.0); support]))
+            // this is for the m_xy = rep_vector(...) in transformed_parameters, which we don't want to print anything so SNone below
+            let def = Let(I(x), Prim("rep_vector", [Const(0.0); support])) 
             let loop = For(a, N(1), support_arr_size, to_Stan_statements s |> target_in (A(I(x), Var(a))))        
-            SSeq(def, loop)
+            SSeq(SNone, loop)
 
         else 
             let def = Let(I(x), Const(0.0))
@@ -205,7 +206,7 @@ let rec to_Stan_statements (S: S) : Statements =
         let statement = to_Stan_statements s
 
         let accname = fresh_acc_ide statement
-        let def = Let(I accname, Prim("rep_vector", [Const(0.0); support])) 
+        let def = Let(I accname, Prim("rep_vector", [Const(0.0); support])) // this is for acc0 = rep_vector(0, x) in transformed_parameters
         let inner = statement |> target_in (A( I accname, Var x ))
         let loop = For(x, N(1), support_arr_size, inner)
                     //SSeq(inner, PlusEq( A( I accname, Var x ), ArrElExp(Var message, Var x) )) )
@@ -220,7 +221,7 @@ let rec to_Stan_statements (S: S) : Statements =
         let statement = to_Stan_statements s
 
         let accname = fresh_acc_ide statement
-        let def = Let(I accname, Prim("rep_vector", [Const(0.0); support])) 
+        let def = Let(I accname, Prim("rep_vector", [Const(0.0); support])) // this is for acc0 = rep_vector(0, x) in generated_quantities
         let inner = statement |> target_in (A( I accname, Var x ))
         let loop = For(x, N(1), support_arr_size, inner)
                 |> rename_Stan_Statements x (x + "_val") 
@@ -311,7 +312,7 @@ let rec transform_model (S: S) : MiniStanProg =
         let statement = to_Stan_statements s
 
         let accname = fresh_acc_ide statement
-        let def =  Let(I accname, Prim("rep_vector", [Const(0.0); support]))
+        let def =  Let(I accname, Prim("reawefaefawefefr", [Const(0.0); support]))
         let inner = statement |> target_in (A( I accname, Var x ))
         let loop = For(x, N(1), support_arr_size, inner)
                     //SSeq(inner, PlusEq( A( I accname, Var x ), ArrElExp(Var message, Var x) )) )
@@ -348,5 +349,3 @@ let transform (gamma : Gamma) (Sd : S, Sm : S , Sq : S ) : MiniStanProg =
     |> join_stan_p (transform_data Sd)  
     |> join_stan_p (transform_model Sm)
     |> join_stan_p (transform_quant Sq)
-
-
