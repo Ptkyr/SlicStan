@@ -1,5 +1,7 @@
 # SlicStan
 
+This is me trying to fix an incredibly broken compiler.
+
 SlicStan<sup>1</sup> is a Stan-like probabilistic programming language that translates to [Stan](https://mc-stan.org/).
 It provides automatic program transformations that allow for a more lightweight syntax and 
 inference optimizations. There are three main ways in which SlicStan and Stan differ:
