@@ -189,10 +189,10 @@ let rec to_Stan_statements (S: S) : Statements =
             let a = List.head args            
             let support_arr_size = N(2)
             let support = Const(2.0) // FIXME: not the right size
-            // this is for the m_xy = rep_vector(...) in transformed_parameters, which we don't want to print anything so SNone below
-            let def = Let(I(x), Prim("rep_vector", [Const(0.0); support])) 
+            // this is for the m_xy = rep_vector(...) in transformed_parameters, we generate intermediate variables as arrays so make this rep_array
+            let def = Let(I(x), Prim("rep_array", [Const(0.0); support])) 
             let loop = For(a, N(1), support_arr_size, to_Stan_statements s |> target_in (A(I(x), Var(a))))        
-            SSeq(SNone, loop)
+            SSeq(def, loop)
 
         else 
             let def = Let(I(x), Const(0.0))
